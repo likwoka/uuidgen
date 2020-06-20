@@ -6,7 +6,7 @@
 //! uuidgen -i        # interactive mode, prompt user for how many to generate.
 //!         
 use std;
-use std::{env, io};
+use std::{env, io, error::Error};
 use uuid::Uuid;
 
 const HELP_MSG: &str = r"uuidgen -- A toy program that generates v4 UUIDs to stdout.
@@ -58,22 +58,29 @@ fn parse_output_mode(args: Vec<String>) -> Result<OutputMode, MyError> {
     }
 }
 
-fn interactive_ask() -> Option<u8>  {
-    // 3) do the work
-    // 4) exit program
-    let mut num = String::new();
+fn interactive_ask() -> Result<u8, String>  {
+    let mut cnt_str = String::new();
     println!("How many UUIDs go do you want to generate?");
-    io::stdin()
-        .read_line(&mut num)
-        .expect("Fail to read line");
-    match num.parse::<u8>() {
-        Ok(cnt) => Some(cnt),
-        Err(_error) => None
+    match io::stdin().read_line(&mut cnt_str) {
+        Ok(_size) => {
+            match cnt_str.trim().parse::<u8>() {
+                Ok(cnt) => Ok(cnt),
+                Err(_error) => {
+                    Err(_error.to_string())
+                }
+            }
+        },
+        Err(_error) => Err(_error.to_string())
     }
 }
 
+fn print_uuids(uuids: Vec<Uuid>) {
+    for x in &uuids {
+        println!("{}", x);
+    } 
+}
+
 fn main() {
-    // TODO3: add instrumentation/timer
     // TODO4: add unit tests
     let args: Vec<String> = env::args().collect();
     let mode = parse_output_mode(args);
@@ -90,24 +97,20 @@ fn main() {
         },
         Ok(OutputMode::Default) => {
             let uuids = gen_uuids(NUM_TO_GENERATE);
-            for x in &uuids {
-                println!("{}", x);
-            }        
+            print_uuids(uuids);
         },
         Ok(OutputMode::NumSpecified(cnt)) => {
             let uuids = gen_uuids(cnt);
-            for x in &uuids {
-                println!("{}", x);
-            }        
+            print_uuids(uuids);
         },
         Ok(OutputMode::Interactive) => {
-            let cnt = match interactive_ask() {
-                Some => 
-            };
-            let uuids = gen_uuids();
-            for x in &uuids {
-                println!("{}", x);
+            match interactive_ask() {
+                Err(msg) => println!("{}", msg),
+                Ok(cnt) => {
+                    let uuids = gen_uuids(cnt);
+                    print_uuids(uuids);
+                }
             }
-        }
+        }        
     };
 }
