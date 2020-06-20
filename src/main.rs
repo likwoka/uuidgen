@@ -4,10 +4,18 @@
 //! uuidgen           # generate 20 UUIDs (the default)
 //! uuidgen -n 5      # generate 5 UUIDs
 //! uuidgen -i        # interactive mode, prompt user for how many to generate.
-//!
+//!         
 use std;
-use std::env;
+use std::{env, io};
 use uuid::Uuid;
+
+const HELP_MSG: &str = r"uuidgen -- A toy program that generates v4 UUIDs to stdout.
+
+Usage:
+uuidgen           # generate 20 UUIDs (the default)
+uuidgen -h        # print this help message
+uuidgen -n 5      # generate 5 UUIDs
+uuidgen -i        # interactive mode, prompt user for how many to generate";
 
 /// Hard code to generate 20 UUIDs by default.
 const NUM_TO_GENERATE: u8 = 20;
@@ -33,23 +41,6 @@ enum MyError {
     NumberNotInteger
 }
 
-// Basic form -- return Enum or panic! (raise error and terminate program)
-//
-// fn parse_output_mode_raw(args: Vec<String>) -> OutputMode {
-//     if args.len() == 1 {
-//         return OutputMode::Default;
-//     } else if args.len() == 2 && args[1] == "-i" {
-//         return OutputMode::Interactive;
-//     } else if args.len() == 3 && args[1] == "-n" {
-//         match args[2].parse::<u8>() {
-//             Ok(cnt) => return OutputMode::NumSpecified(cnt),
-//             Err(_error) => panic!("Number must be an integer!")
-//         };
-//     } else {
-//         panic!("Wrong syntax!");
-//     }
-// }
-
 fn parse_output_mode(args: Vec<String>) -> Result<OutputMode, MyError> {
     if args.len() == 1 {
         Ok(OutputMode::Default)
@@ -67,7 +58,18 @@ fn parse_output_mode(args: Vec<String>) -> Result<OutputMode, MyError> {
     }
 }
 
-fn interactive_loop() {
+fn interactive_ask() -> Option<u8>  {
+    // 3) do the work
+    // 4) exit program
+    let mut num = String::new();
+    println!("How many UUIDs go do you want to generate?");
+    io::stdin()
+        .read_line(&mut num)
+        .expect("Fail to read line");
+    match num.parse::<u8>() {
+        Ok(cnt) => Some(cnt),
+        Err(_error) => None
+    }
 }
 
 fn main() {
@@ -78,7 +80,7 @@ fn main() {
 
     match mode {
         Ok(OutputMode::Help) => {
-
+            println!("{}", HELP_MSG);
         },
         Err(MyError::NumberNotInteger) => {
             println!("Input must be an integer!");
@@ -99,7 +101,13 @@ fn main() {
             }        
         },
         Ok(OutputMode::Interactive) => {
-            interactive_loop()
+            let cnt = match interactive_ask() {
+                Some => 
+            };
+            let uuids = gen_uuids();
+            for x in &uuids {
+                println!("{}", x);
+            }
         }
     };
 }
