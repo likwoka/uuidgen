@@ -6,7 +6,7 @@
 //! uuidgen -i        # interactive mode, prompt user for how many to generate.
 //!         
 use std;
-use std::{env, io, error::Error};
+use std::{env, io};
 use uuid::Uuid;
 
 const HELP_MSG: &str = r"uuidgen -- A toy program that generates v4 UUIDs to stdout.
