@@ -81,7 +81,6 @@ fn print_uuids(uuids: Vec<Uuid>) {
 }
 
 fn main() {
-    // TODO4: add unit tests
     let args: Vec<String> = env::args().collect();
     let mode = parse_output_mode(args);
 
@@ -113,4 +112,44 @@ fn main() {
             }
         }        
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn gen_uuids_by_cnt() {
+        let actual = gen_uuids(2);
+        assert_eq!(actual.len(), 2);
+    }
+
+    #[test]
+    fn parse_output_mode_default_ok() {
+
+    }
+
+    #[test]
+    fn parse_output_mode_too_many_arguments() {
+    }
+
+    #[test]
+    fn parse_output_mode_unknown_arguments() {
+
+    }
+
+    #[test]
+    fn parse_output_mode_help_ok() {
+
+    }
+
+    #[test]
+    fn parse_output_mode_interactive_ok() {
+
+    }
+
+    #[test]
+    fn parse_output_mode_cnt_specified_ok() {
+
+    }    
+
 }
