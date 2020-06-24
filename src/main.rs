@@ -29,6 +29,7 @@ fn gen_uuids(count: u8) -> Vec<Uuid> {
     vals
 }
 
+#[derive(Debug, PartialEq)]
 enum OutputMode {
     Help,
     Default,
@@ -36,6 +37,7 @@ enum OutputMode {
     Interactive
 }
 
+#[derive(Debug, PartialEq)]
 enum MyError {
     WrongSyntax,
     NumberNotInteger
@@ -125,31 +127,66 @@ mod tests {
 
     #[test]
     fn parse_output_mode_default_ok() {
-
+        let args = vec!["uuidgen".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_ok());
+        assert_eq!(actual.ok(), Some(OutputMode::Default));
     }
 
     #[test]
     fn parse_output_mode_too_many_arguments() {
+        let args = vec!["uuidgen".into(), "too".into(), "many".into(), "arguments".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_err());
+        assert_eq!(actual.err(), Some(MyError::WrongSyntax));
+    }
+
+    #[test]
+    fn parse_output_mode_too_many_arguments2() {
+        let args = vec!["uuidgen".into(), "-n".into(), "3".into(), "-i".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_err());
+        assert_eq!(actual.err(), Some(MyError::WrongSyntax));
     }
 
     #[test]
     fn parse_output_mode_unknown_arguments() {
+        let args = vec!["uuidgen".into(), "-?".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_err());
+        assert_eq!(actual.err(), Some(MyError::WrongSyntax));
+    }
 
+    #[test]
+    fn parse_output_mode_cnt_specified_must_be_integer() {
+        let args = vec!["uuidgen".into(), "-n".into(), "3.0".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_err());
+        assert_eq!(actual.err(), Some(MyError::NumberNotInteger));
     }
 
     #[test]
     fn parse_output_mode_help_ok() {
-
+        let args = vec!["uuidgen".into(), "-h".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_ok());
+        assert_eq!(actual.ok(), Some(OutputMode::Help));
     }
 
     #[test]
     fn parse_output_mode_interactive_ok() {
-
+        let args = vec!["uuidgen".into(), "-i".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_ok());
+        assert_eq!(actual.ok(), Some(OutputMode::Interactive));
     }
 
     #[test]
     fn parse_output_mode_cnt_specified_ok() {
-
-    }    
+        let args = vec!["uuidgen".into(), "-n".into(), "3".into()];
+        let actual = parse_output_mode(args);
+        assert!(actual.is_ok());
+        assert_eq!(actual.ok(), Some(OutputMode::NumSpecified(3)));
+    }
 
 }
